@@ -4,7 +4,8 @@ A Python benchmarking suite for measuring LLM inference performance, focusing on
 
 ## Features
 
-- **Multi-Provider Support**: Benchmark models from Kimi, Z.ai, Minimax, and Fireworks
+- **Multi-Provider Support**: Benchmark models from OpenAI, Anthropic, Kimi, Z.ai, Minimax, Fireworks, and OpenRouter
+- **YAML Configuration**: Easily add new providers via `providers.yaml` - no code changes needed
 - **Dual API Formats**: Supports both OpenAI Chat API and Anthropic Messages API
 - **Diverse Prompts**: MT-Bench inspired prompts across 8 categories
 - **Multi-Turn Support**: Test conversation context handling with follow-up prompts
@@ -35,10 +36,22 @@ The benchmark includes 24 prompts across 8 categories inspired by MT-Bench:
 
 | Provider | Default Model | API Styles | Env Variable |
 |----------|---------------|------------|--------------|
+| OpenAI | gpt-5.2-codex | OpenAI | `OPENAI_API_KEY` |
+| Anthropic | claude-opus-4-6 | Anthropic | `ANTHROPIC_API_KEY` |
 | Kimi | K2.5 | OpenAI | `KIMI_API_KEY` |
 | Z.ai | glm-5 | OpenAI, Anthropic | `ZAI_API_KEY` |
 | Minimax | MiniMax-M2.5-highspeed | OpenAI, Anthropic | `MINIMAX_API_KEY` |
 | Fireworks | (none - specify with `--model`) | OpenAI | `FIREWORKS_API_KEY` |
+| OpenRouter | qwen/qwen3.5-plus-02-15 | OpenAI, Anthropic | `OPENROUTER_API_KEY` |
+
+### Adding New Providers
+
+Edit `providers.yaml` to add new providers. Each provider needs:
+- `name`: Display name
+- `default_model`: Default model name (or `null` to require `--model`)
+- `supported_apis`: List of supported APIs (`openai` and/or `anthropic`)
+- `api_key_env`: Environment variable name for the API key
+- Per-API config: `base_url` and `endpoints` for each supported API
 
 ## Setup
 
@@ -52,10 +65,13 @@ The benchmark includes 24 prompts across 8 categories inspired by MT-Bench:
    Create a `.env` file in the project root:
    ```env
    # At least one of these is required:
+   OPENAI_API_KEY=your_openai_key
+   ANTHROPIC_API_KEY=your_anthropic_key
    KIMI_API_KEY=your_kimi_key
    ZAI_API_KEY=your_z_key
    MINIMAX_API_KEY=your_minimax_key
    FIREWORKS_API_KEY=your_fireworks_key
+   OPENROUTER_API_KEY=your_openrouter_key
    ```
 
 ## Usage
@@ -63,13 +79,19 @@ The benchmark includes 24 prompts across 8 categories inspired by MT-Bench:
 ### Basic Usage
 
 ```bash
+# Benchmark OpenAI
+uv run benchmark.py --provider openai
+
+# Benchmark Anthropic
+uv run benchmark.py --provider anthropic
+
 # Benchmark Kimi with default settings
 uv run benchmark.py --provider kimi
 
 # Benchmark Minimax
 uv run benchmark.py --provider minimax
 
-# Benchmark with Anthropic API format
+# Benchmark with Anthropic API format (for providers that support it)
 uv run benchmark.py --provider minimax --api-style anthropic
 ```
 

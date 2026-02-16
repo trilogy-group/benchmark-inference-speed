@@ -6,6 +6,7 @@ import statistics
 import argparse
 import numpy as np
 import requests
+import yaml
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.table import Table
@@ -14,67 +15,16 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCo
 load_dotenv()
 console = Console()
 
-# --- Provider Configuration ---
+# --- Provider Configuration (loaded from YAML) ---
 
-PROVIDERS = {
-    "kimi": {
-        "name": "Kimi (K2.5)",
-        "default_model": "K2.5",
-        "api_style": "openai",
-        "base_url": "https://api.kimi.com/coding/v1",
-        "api_key_env": "KIMI_API_KEY",
-        "endpoints": {
-            "chat": "/chat/completions",
-            "completion": "/completions"
-        }
-    },
-    "z": {
-        "name": "Z.ai (GLM-5)",
-        "default_model": "glm-5",
-        "api_style": "openai",
-        "base_url": "https://api.z.ai/api/coding/paas/v4",
-        "api_key_env": "ZAI_API_KEY",
-        "anthropic_url": "https://api.z.ai/api/anthropic",
-        "endpoints": {
-            "chat": "/chat/completions",
-            "completion": "/completions"
-        }
-    },
-    "minimax": {
-        "name": "Minimax (M2.5-highspeed)",
-        "default_model": "MiniMax-M2.5-highspeed",
-        "api_style": "openai",
-        "base_url": "https://api.minimax.io/v1",
-        "api_key_env": "MINIMAX_API_KEY",
-        "anthropic_url": "https://api.minimax.io/anthropic/v1",
-        "endpoints": {
-            "chat": "/chat/completions",
-            "completion": "/completions"
-        }
-    },
-    "fireworks": {
-        "name": "Fireworks",
-        "default_model": None,  # No default - must be provided
-        "api_style": "openai",
-        "base_url": "https://api.fireworks.ai/inference/v1",
-        "api_key_env": "FIREWORKS_API_KEY",
-        "endpoints": {
-            "chat": "/chat/completions",
-            "completion": "/completions"
-        }
-    },
-    "openrouter": {
-        "name": "OpenRouter",
-        "default_model": "qwen/qwen3.5-plus-02-15",
-        "api_style": "openai",
-        "base_url": "https://openrouter.ai/api/v1",
-        "api_key_env": "OPENROUTER_API_KEY",
-        "anthropic_url": "https://openrouter.ai/api",
-        "endpoints": {
-            "chat": "/chat/completions"
-        }
-    }
-}
+def load_providers():
+    """Load provider configurations from providers.yaml"""
+    config_path = os.path.join(os.path.dirname(__file__), "providers.yaml")
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+    return config.get("providers", {})
+
+PROVIDERS = load_providers()
 
 
 def get_api_key(provider_config):
@@ -532,17 +482,27 @@ def run_benchmarks():
         return
 
     # Determine API style (openai or anthropic)
-    api_style = args.api_style or provider.get("api_style", "openai")
-    
+    supported_apis = provider.get("supported_apis", ["openai"])
+    api_style = args.api_style or supported_apis[0]
+
+    # Validate API style is supported
+    if api_style not in supported_apis:
+        console.print(f"[bold red]Error:[/] {args.provider} does not support {api_style} API format. Supported: {supported_apis}")
+        return
+
     # Build URLs based on API style
+    api_config = provider.get(api_style)
+    if not api_config:
+        console.print(f"[bold red]Error:[/] {args.provider} does not support {api_style} API.")
+        return
+
+    base_url = api_config["base_url"]
+    endpoints = api_config["endpoints"]
+
     if api_style == "anthropic":
-        chat_url = provider.get("anthropic_url")
-        if not chat_url:
-            console.print(f"[bold red]Error:[/] {args.provider} does not support Anthropic API format.")
-            return
-        chat_url = chat_url + "/messages"
+        chat_url = base_url + endpoints.get("messages", "/messages")
     else:
-        chat_url = provider["base_url"] + provider["endpoints"]["chat"]
+        chat_url = base_url + endpoints.get("chat", "/chat/completions")
 
     console.print(f"\n[bold blue]LLM Performance Benchmark[/]")
     console.print(f"[dim]Provider:[/] {provider['name']}")

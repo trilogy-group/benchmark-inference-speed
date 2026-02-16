@@ -1,0 +1,99 @@
+# Provider configurations for LLM Benchmark
+# Add new providers here - no code changes needed
+
+providers:
+  openai:
+    name: "OpenAI"
+    default_model: "gpt-5.2-codex"
+    supported_apis:
+      - openai
+    api_key_env: "OPENAI_API_KEY"
+    openai:
+      base_url: "https://api.openai.com/v1"
+      endpoints:
+        chat: "/chat/completions"
+
+  anthropic:
+    name: "Anthropic"
+    default_model: "claude-opus-4-6"
+    supported_apis:
+      - anthropic
+    api_key_env: "ANTHROPIC_API_KEY"
+    anthropic:
+      base_url: "https://api.anthropic.com"
+      endpoints:
+        messages: "/v1/messages"
+
+  kimi:
+    name: "Kimi (K2.5)"
+    default_model: "K2.5"
+    supported_apis:
+      - openai
+    api_key_env: "KIMI_API_KEY"
+    openai:
+      base_url: "https://api.kimi.com/coding/v1"
+      endpoints:
+        chat: "/chat/completions"
+        completion: "/completions"
+
+  z:
+    name: "Z.ai (GLM-5)"
+    default_model: "glm-5"
+    supported_apis:
+      - openai
+      - anthropic
+    api_key_env: "ZAI_API_KEY"
+    openai:
+      base_url: "https://api.z.ai/api/coding/paas/v4"
+      endpoints:
+        chat: "/chat/completions"
+        completion: "/completions"
+    anthropic:
+      base_url: "https://api.z.ai/api/anthropic"
+      endpoints:
+        messages: "/v1/messages"
+
+  minimax:
+    name: "Minimax (M2.5-highspeed)"
+    default_model: "MiniMax-M2.5-highspeed"
+    supported_apis:
+      - openai
+      - anthropic
+    api_key_env: "MINIMAX_API_KEY"
+    openai:
+      base_url: "https://api.minimax.io/v1"
+      endpoints:
+        chat: "/chat/completions"
+        completion: "/completions"
+    anthropic:
+      base_url: "https://api.minimax.io/anthropic/v1"
+      endpoints:
+        messages: "/v1/messages"
+
+  fireworks:
+    name: "Fireworks"
+    default_model: null  # Must be provided via --model
+    supported_apis:
+      - openai
+    api_key_env: "FIREWORKS_API_KEY"
+    openai:
+      base_url: "https://api.fireworks.ai/inference/v1"
+      endpoints:
+        chat: "/chat/completions"
+        completion: "/completions"
+
+  openrouter:
+    name: "OpenRouter"
+    default_model: "qwen/qwen3.5-plus-02-15"
+    supported_apis:
+      - openai
+      - anthropic
+    api_key_env: "OPENROUTER_API_KEY"
+    openai:
+      base_url: "https://openrouter.ai/api/v1"
+      endpoints:
+        chat: "/chat/completions"
+    anthropic:
+      base_url: "https://openrouter.ai/api"
+      endpoints:
+        messages: "/v1/messages"
