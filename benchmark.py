@@ -62,6 +62,17 @@ PROVIDERS = {
             "chat": "/chat/completions",
             "completion": "/completions"
         }
+    },
+    "openrouter": {
+        "name": "OpenRouter",
+        "default_model": "qwen/qwen3.5-plus-02-15",
+        "api_style": "openai",
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key_env": "OPENROUTER_API_KEY",
+        "anthropic_url": "https://openrouter.ai/api",
+        "endpoints": {
+            "chat": "/chat/completions"
+        }
     }
 }
 
